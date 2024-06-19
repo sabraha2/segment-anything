@@ -4,6 +4,9 @@ from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 from PIL import Image
 import requests
 from transformers import SamModel, SamProcessor
+import torch
+import warnings
+warnings.filterwarnings('ignore')
 
 """
 # This is for SAM from GitHub Repo
@@ -38,11 +41,19 @@ test_img_path = "/project01/cvrl/jhuang24/australia-backup/data/imgs/2019-11-20-
 mask_path = "/project01/cvrl/jhuang24/australia-backup/data/masks/2019-11-20-F1-0167_896_896.jpg"
 prompt = "grass"
 
-model = SamModel.from_pretrained(pretrain_model_path)
+# Setup model and processor
+print("Setting up model and processor.")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = SamModel.from_pretrained(pretrain_model_path).to(device)
+processor = SamProcessor.from_pretrained("facebook/sam-vit-huge")
 
-inputs = processor(raw_image, input_points=input_points, return_tensors="pt").to("cuda")
-outputs = model(**inputs)
-masks = processor.image_processor.post_process_masks(outputs.pred_masks.cpu(), inputs["original_sizes"].cpu(), inputs["reshaped_input_sizes"].cpu())
-scores = outputs.iou_scores
+
+# Process image and extract embeddings
+print("Process image and extract embeddings.")
+raw_image = Image.open(test_img_path).convert("RGB")
+inputs = processor(raw_image, return_tensors="pt").to(device)
+image_embeddings = model.get_image_embeddings(inputs["pixel_values"])
+
+
 
 
