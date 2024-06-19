@@ -4,6 +4,7 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+
 import cv2  # type: ignore
 
 from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
