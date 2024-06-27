@@ -10,6 +10,6 @@
 # Required modules
 module load conda
 conda init bash
-source activate sam
+conda activate segment-anything-env
 
 python finetune.py
