@@ -14,9 +14,30 @@ import warnings
 warnings.filterwarnings('ignore')
 from torch.nn.functional import threshold, normalize
 
+# Define the smoothness loss function
+def smoothness_loss(pred, lambda_smooth=0.1):
+    # Compute gradients along x and y directions
+    dy = torch.abs(pred[:, :, 1:, :] - pred[:, :, :-1, :])
+    dx = torch.abs(pred[:, :, :, 1:] - pred[:, :, :, :-1])
+    
+    return lambda_smooth * (torch.mean(dx) + torch.mean(dy))
+
+# Function to combine segmentation and smoothness loss
+def combined_loss(pred, target, t, lambda_smooth=0.1):
+    # Calculate segmentation loss
+    seg_loss_value = seg_loss(pred, target)
+    
+    # Calculate smoothness loss
+    smooth_loss_value = smoothness_loss(pred, lambda_smooth)
+    
+    # Combine the losses using the homotopy parameter t
+    total_loss = (1 - t) * seg_loss_value + t * smooth_loss_value
+    
+    return total_loss
+
 # Data and model directories
 train_data_dir = "/project01/cvrl/jhuang24/australia-backup/data/test/"
-save_model_path = "/project01/cvrl/jhuang24/sam_data/finetune"
+save_model_path = "/project01/cvrl/sabraha2/sam_data/finetune"
 
 # Define customized dataset
 processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
@@ -32,11 +53,10 @@ train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True)
 
 batch = next(iter(train_dataloader))
 
-for k,v in batch.items():
-  print(k,v.shape)
+for k, v in batch.items():
+    print(k, v.shape)
 
 print("GT mask: ", batch["ground_truth_mask"].shape)
-
 
 # Load pretrain model
 model = SamModel.from_pretrained("facebook/sam-vit-base")
@@ -60,22 +80,20 @@ model.train()
 
 for epoch in range(num_epochs):
     epoch_losses = []
-
-    # i = 0
+    t = epoch / num_epochs  # Calculate the homotopy parameter
 
     for batch in tqdm(train_dataloader):
-
         # forward pass
         outputs = model(pixel_values=batch["pixel_values"].to(device),
-                      input_boxes=batch["input_boxes"].to(device),
-                      multimask_output=False)
+                        input_boxes=batch["input_boxes"].to(device),
+                        multimask_output=False)
 
         # compute loss
         predicted_masks = outputs.pred_masks.squeeze(1)
         ground_truth_masks = batch["ground_truth_mask"].float().to(device)
 
-        # TODO (JH): I think SAM actually used MSE loss, but this is TBD.
-        loss = seg_loss(predicted_masks, ground_truth_masks)
+        # Calculate combined loss
+        loss = combined_loss(predicted_masks, ground_truth_masks, t)
 
         # backward pass (compute gradients of parameters w.r.t. loss)
         optimizer.zero_grad()
@@ -86,6 +104,7 @@ for epoch in range(num_epochs):
         epoch_losses.append(loss.item())
 
     # Save model for each epoch
-    # model_name = "finetune_sam_epoch_" + str(epoch).zfill(4) + ".pth"
     model.save_pretrained(save_model_path)
-    # print("Model saved.")
+    print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {mean(epoch_losses):.4f}")
+
+print("Training complete.")
