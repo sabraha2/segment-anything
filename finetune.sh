@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#$ -M jhuang24@nd.edu
+#$ -M sabraha2@nd.edu
 #$ -m abe
 #$ -q gpu -l gpu=1
 #$ -l h=!qa-a10-*
 #$ -e errors/
-#$ -N finetune-sam-vit-base-100-epochs
+#$ -N finetune-mulit-sam-vit-base-100-epochs
 
 # Required modules
 module load conda
