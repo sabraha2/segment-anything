@@ -2,7 +2,7 @@
 
 #$ -M sabraha2@nd.edu
 #$ -m abe
-#$ -q gpu-long
+#$ -q gpu
 #$ -l gpu_card=1
 #$ -l h=!qa-a10-*
 #$ -e errors/
