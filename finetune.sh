@@ -4,7 +4,6 @@
 #$ -m abe
 #$ -q gpu
 #$ -l gpu_card=1
-#$ -l h=!qa-a10-*
 #$ -e errors/
 #$ -N finetune-mulit-sam-vit-base-100-epochs
 
