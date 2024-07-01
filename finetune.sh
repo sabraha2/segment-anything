@@ -2,7 +2,7 @@
 
 #$ -M sabraha2@nd.edu
 #$ -m abe
-#$ -q gpu
+#$ -q gpu-long
 #$ -l gpu_card=1
 #$ -e errors/
 #$ -N finetune-mulit-sam-vit-base-100-epochs

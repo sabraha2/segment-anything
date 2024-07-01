@@ -37,7 +37,7 @@ def combined_loss(pred, target, t, lambda_smooth=0.1):
 
 # Data and model directories
 train_data_dir = "/project01/cvrl/jhuang24/australia-backup/data/test/"
-save_model_path = "/project01/cvrl/sabraha2/sam_data/finetune"
+save_model_path = "/project01/cvrl/sabraha2/sam_data/finetune_v2"
 
 # Define customized dataset
 processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
