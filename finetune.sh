@@ -5,7 +5,7 @@
 #$ -q gpu
 #$ -l gpu_card=1
 #$ -e errors/
-#$ -N finetune-mulit-sam-vit-base-100-epochs
+#$ -N finetune-mulit-sam-vit-base-50-epochs
 
 # Required modules
 module load conda

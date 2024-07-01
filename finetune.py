@@ -37,7 +37,7 @@ def combined_loss(pred, target, t, lambda_smooth=0.1):
 
 # Data and model directories
 train_data_dir = "/project01/cvrl/jhuang24/australia-backup/data/test/"
-save_model_path = "/project01/cvrl/sabraha2/sam_data/finetune_v2"
+save_model_path = "/project01/cvrl/sabraha2/sam_data/finetune_v3_epochs_50"
 
 # Define customized dataset
 processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
@@ -71,7 +71,7 @@ optimizer = Adam(model.mask_decoder.parameters(), lr=1e-5, weight_decay=0)
 
 seg_loss = monai.losses.DiceCELoss(sigmoid=True, squared_pred=True, reduction='mean')
 
-num_epochs = 100
+num_epochs = 50
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
