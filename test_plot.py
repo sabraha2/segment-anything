@@ -17,7 +17,7 @@ warnings.filterwarnings('ignore')
 
 # Data and model directories
 data_dir = "/project01/cvrl/jhuang24/australia-backup/data"
-save_model_path = "/project01/cvrl/sabraha2/sam_data/finetune_v3_epochs_50"
+save_model_path = "/project01/cvrl/sabraha2/sam_data/finetune_v3_epochs_50/model.safetensors"
 
 batch_size = 1
 threshold_value = 0.5
