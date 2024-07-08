@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader
 import warnings
 from segdataset import SegmentationDataset
 from safetensors.torch import load_file as load_safetensor
+from safetensors import safe_open
 warnings.filterwarnings('ignore')
 
 # Data and model directories
@@ -28,10 +29,21 @@ def calculate_eer(fpr, tpr, thresholds):
     eer = fpr[eer_threshold_index]
     return eer, eer_threshold, eer_threshold_index
 
-def test_model(data_directory, model_dir, batch_size, threshold_value):
+def test_model(data_directory, model_path, batch_size, threshold_value):
     # Load pre-trained model
     model = SamModel.from_pretrained("facebook/sam-vit-base")
-    model.load_state_dict(load_safetensor(model_dir))
+    
+    # Ensure model is loaded correctly
+    if not os.path.isfile(model_path):
+        raise FileNotFoundError(f"The model file at {model_path} was not found.")
+    
+    tensors = {}
+    with safe_open(model_path, framework="pt", device="cpu") as f:
+        for k in f.keys():
+            tensors[k] = f.get_tensor(k)
+    
+    model.load_state_dict(tensors)
+    
     processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -110,7 +122,7 @@ def test_model(data_directory, model_dir, batch_size, threshold_value):
         "eer_threshold_index": eer_threshold_index
     }
 
-    save_path = os.path.join(model_dir, "finetuned_sam_results.pkl")
+    save_path = os.path.join(os.path.dirname(model_path), "finetuned_sam_results.pkl")
 
     with open(save_path, 'wb') as f:
         pickle.dump(result_dict, f)
@@ -140,11 +152,11 @@ def plot_roc_curve(result_dict):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver Operating Characteristic')
     plt.legend(loc="lower right")
-    plt.savefig("plot_sam_dub.ong")
+    plt.savefig("Test.png")
 
 if __name__ == "__main__":
     result_dict = test_model(data_directory=data_dir,
-                             model_dir=save_model_path,
+                             model_path=save_model_path,
                              batch_size=batch_size,
                              threshold_value=threshold_value)
     plot_roc_curve(result_dict)
