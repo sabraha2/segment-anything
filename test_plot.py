@@ -42,7 +42,7 @@ def test_model(data_directory, model_path, batch_size, threshold_value):
         for k in f.keys():
             tensors[k] = f.get_tensor(k)
     
-    model.load_state_dict(tensors)
+    model.load_state_dict(tensors, strict=False)
     
     processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
 
